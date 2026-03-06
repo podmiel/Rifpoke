@@ -2,249 +2,938 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
+  <title>Roue Pokémon complète</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Roue</title>
   <style>
-    * {
-      box-sizing: border-box;
+    :root {
+      --bg: #000000;
+      --card: #111827;
+      --border: rgba(255,255,255,0.15);
+      --accent: #facc15;
+      --text-main: #f9fafb;
+      --text-muted: #9ca3af;
+      --success: #4ade80;
     }
-
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      margin: 0;
+      font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+      background: radial-gradient(circle at top,#1f2937 0,#000 55%);
+      color: var(--text-main);
       min-height: 100vh;
       display: flex;
+      align-items: stretch;
       justify-content: center;
-      align-items: center;
-      background: #000;
-      font-family: Arial, sans-serif;
-      color: white;
+      padding: 1.5rem;
     }
-
-    .container {
+    .layout {
+      display: grid;
+      grid-template-columns: 1.3fr 1fr;
+      gap: 1.5rem;
       width: 100%;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 20px;
-      text-align: center;
+      max-width: 1400px;
     }
-
-    h1 {
-      margin: 0 0 30px;
-      font-size: 42px;
-      letter-spacing: 1px;
+    @media (max-width: 960px) {
+      .layout { grid-template-columns: 1fr; }
     }
-
-    .wheel-wrapper {
+    .card {
+      background: #020617;
+      border-radius: 1.25rem;
+      border: 1px solid var(--border);
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
       position: relative;
-      width: 380px;
-      height: 380px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-bottom: 30px;
-    }
-
-    .pointer {
-      position: absolute;
-      top: -8px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 18px solid transparent;
-      border-right: 18px solid transparent;
-      border-top: 38px solid white;
-      z-index: 10;
-      filter: drop-shadow(0 0 10px rgba(255,255,255,0.35));
-    }
-
-    .wheel {
-      position: relative;
-      width: 340px;
-      height: 340px;
-      border-radius: 50%;
-      border: 8px solid white;
-      box-shadow:
-        0 0 20px rgba(255,255,255,0.15),
-        0 0 60px rgba(255,255,255,0.08);
       overflow: hidden;
-      transition: transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-      background:
-        conic-gradient(
-          #ff3b3b 0deg 60deg,
-          #2d7cff 60deg 120deg,
-          #18c964 120deg 180deg,
-          #ffd60a 180deg 240deg,
-          #ff9f0a 240deg 300deg,
-          #bf5af2 300deg 360deg
-        );
     }
-
+    .card::before {
+      content:"";
+      position:absolute; inset:0;
+      background:radial-gradient(circle at top,rgba(250,204,21,0.08),transparent 60%);
+      pointer-events:none;
+    }
+    .card-header {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:0.75rem; position:relative; z-index:1;
+    }
+    .card-title {
+      font-size:1.15rem; font-weight:700; letter-spacing:0.02em;
+      display:flex; align-items:center; gap:0.5rem;
+    }
+    .card-title .icon { font-size:1.4rem; }
+    .card-subtitle { font-size:0.8rem; color:var(--text-muted); }
+    .tag {
+      font-size:0.7rem; padding:0.2rem 0.5rem; border-radius:999px;
+      border:1px solid var(--border); color:var(--text-muted);
+      text-transform:uppercase; letter-spacing:0.08em;
+    }
+    .wheels-grid {
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:1rem; position:relative; z-index:1;
+    }
+    @media (max-width: 1200px) {
+      .wheels-grid { grid-template-columns:1fr; }
+    }
+    .wheel-card {
+      background:rgba(15,23,42,0.9);
+      border:1px solid rgba(148,163,184,0.35);
+      border-radius:1rem;
+      padding:0.75rem 0.75rem 1rem;
+    }
+    .wheel-header {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-bottom:0.5rem;
+    }
+    .wheel-title {
+      font-size:0.95rem; font-weight:600;
+      display:flex; align-items:center; gap:0.4rem;
+    }
+    .wheel-title .emoji { font-size:1.15rem; }
+    .step-badge {
+      font-size:0.7rem; color:var(--text-muted);
+      text-transform:uppercase; letter-spacing:0.08em;
+    }
+    .wheel-container {
+      position:relative; width:100%; max-width:320px;
+      margin:0.25rem auto 0.75rem; aspect-ratio:1/1;
+      display:flex; align-items:center; justify-content:center;
+    }
+    canvas {
+      width:100%; height:100%;
+      filter:drop-shadow(0 12px 30px rgba(0,0,0,0.75));
+      border-radius:999px;
+    }
+    .pointer {
+      position:absolute; top:-18px; left:50%;
+      transform:translateX(-50%);
+      width:0; height:0;
+      border-left:16px solid transparent;
+      border-right:16px solid transparent;
+      border-top:32px solid var(--accent);
+      filter:drop-shadow(0 3px 6px rgba(0,0,0,0.6));
+      z-index:5;
+    }
     .center-circle {
-      position: absolute;
-      width: 70px;
-      height: 70px;
-      background: #111;
-      border: 5px solid white;
-      border-radius: 50%;
-      z-index: 5;
-      box-shadow: 0 0 15px rgba(255,255,255,0.2);
+      position:absolute; inset:50%; transform:translate(-50%,-50%);
+      width:76px; height:76px; border-radius:999px;
+      border:4px solid #0f172a;
+      background:radial-gradient(circle at 30% 30%,#fff,#e5e7eb);
+      display:flex; align-items:center; justify-content:center;
+      box-shadow:0 0 0 2px rgba(15,23,42,0.7),0 16px 30px rgba(0,0,0,0.7);
+      overflow:hidden; z-index:4;
     }
-
-    .label {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 140px;
-      transform-origin: 0% 0%;
-      font-weight: bold;
-      font-size: 18px;
-      color: white;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
-      pointer-events: none;
+    .center-circle img { width:100%; height:100%; object-fit:cover; }
+    .controls {
+      display:flex; align-items:center; justify-content:space-between; gap:0.5rem;
     }
-
-    button {
-      border: none;
-      background: white;
-      color: black;
-      font-size: 22px;
-      font-weight: bold;
-      padding: 14px 32px;
-      border-radius: 14px;
-      cursor: pointer;
-      transition: 0.2s ease;
-      box-shadow: 0 0 18px rgba(255,255,255,0.18);
+    .btn {
+      border:none; border-radius:999px;
+      padding:0.6rem 1rem;
+      font-size:0.9rem; font-weight:600;
+      letter-spacing:0.04em; text-transform:uppercase;
+      cursor:pointer; transition:all 0.15s ease;
+      display:inline-flex; align-items:center; gap:0.35rem;
     }
-
-    button:hover {
-      transform: scale(1.05);
+    .btn-primary {
+      background:linear-gradient(135deg,#fbbf24,#f97316);
+      color:#111827; box-shadow:0 8px 20px rgba(251,191,36,0.35);
     }
-
-    button:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
+    .btn-primary:hover:not(:disabled) {
+      transform:translateY(-1px);
+      box-shadow:0 10px 24px rgba(251,191,36,0.45);
     }
-
-    .result {
-      margin-top: 25px;
-      min-height: 40px;
-      font-size: 28px;
-      font-weight: bold;
-      color: #ffd60a;
-      text-shadow: 0 0 12px rgba(255,214,10,0.35);
+    .btn-primary:disabled {
+      opacity:0.45; cursor:not-allowed; box-shadow:none;
     }
-
-    .sub {
-      margin-top: 10px;
-      color: #aaa;
-      font-size: 15px;
+    .btn-ghost { background:transparent; color:var(--text-muted); }
+    .btn-ghost .dot {
+      width:6px; height:6px; border-radius:999px; background:var(--accent);
     }
-
-    @media (max-width: 500px) {
-      .wheel-wrapper {
-        width: 300px;
-        height: 300px;
-      }
-
-      .wheel {
-        width: 280px;
-        height: 280px;
-      }
-
-      .label {
-        width: 115px;
-        font-size: 15px;
-      }
-
-      h1 {
-        font-size: 32px;
-      }
-
-      .result {
-        font-size: 22px;
-      }
+    .btn-primary.spinning {
+      animation:pulse 0.5s ease-in-out infinite alternate;
+    }
+    @keyframes pulse {
+      from { transform:translateY(0); }
+      to   { transform:translateY(-2px); }
+    }
+    .result-display {
+      margin-top:0.4rem; padding:0.5rem 0.75rem;
+      border-radius:0.75rem;
+      background:rgba(15,23,42,0.9);
+      border:1px solid rgba(148,163,184,0.4);
+      display:flex; align-items:center; gap:0.5rem;
+      min-height:40px; font-size:0.9rem;
+    }
+    .result-emoji { font-size:1.4rem; }
+    .result-text strong { color:var(--accent); font-weight:700; }
+    .status-pill {
+      font-size:0.7rem; padding:0.15rem 0.5rem;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,0.5);
+      color:var(--text-muted);
+      display:inline-flex; align-items:center; gap:0.3rem;
+    }
+    .status-pill .dot {
+      width:6px; height:6px; border-radius:999px; background:var(--success);
+    }
+    .summary-card {
+      margin-top:0.75rem;
+      border-radius:0.85rem;
+      border:1px dashed rgba(148,163,184,0.5);
+      padding:0.75rem 0.8rem;
+      background:radial-gradient(circle at top left,rgba(56,189,248,0.08),transparent 65%);
+      font-size:0.85rem;
+    }
+    .summary-title {
+      font-size:0.8rem;
+      text-transform:uppercase;
+      letter-spacing:0.1em;
+      color:var(--text-muted);
+      margin-bottom:0.2rem;
+    }
+    .summary-value { font-size:0.95rem; }
+    .summary-value strong { color:var(--accent); }
+    .pokemon-meta {
+      margin-top:0.15rem;
+      font-size:0.8rem;
+      color:var(--text-muted);
+    }
+    .hint {
+      margin-top:0.35rem;
+      font-size:0.78rem;
+      color:var(--text-muted);
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Ma Roue 🎡</h1>
+  <div class="layout">
+    <!-- Colonne gauche : régions + types -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            <span class="icon">🎡</span>
+            <span>Roues Régions & Types</span>
+          </div>
+          <div class="card-subtitle">Tourne d’abord la région, puis le type.</div>
+        </div>
+        <span class="tag">Étapes 1 & 2</span>
+      </div>
 
-    <div class="wheel-wrapper">
-      <div class="pointer"></div>
-      <div id="wheel" class="wheel"></div>
-      <div class="center-circle"></div>
+      <div class="wheels-grid">
+        <!-- Roue des régions -->
+        <div class="wheel-card">
+          <div class="wheel-header">
+            <div class="wheel-title">
+              <span class="emoji">🗺️</span><span>Roue des régions</span>
+            </div>
+            <span class="step-badge">Étape 1</span>
+          </div>
+          <div class="wheel-container">
+            <div class="pointer"></div>
+            <canvas id="regionCanvas"></canvas>
+            <div class="center-circle">
+              <img src="https://agi-prod-file-upload-public-main-use1.s3.amazonaws.com/3d3b1b2c-94fa-4348-98b7-b25ba4fcae82" alt="Pokéball">
+            </div>
+          </div>
+          <div class="controls">
+            <button class="btn btn-primary" id="spinRegionBtn">
+              <span>Tourner la roue</span>
+            </button>
+            <button class="btn btn-ghost" type="button">
+              <span class="dot"></span><span>Régions Kanto → Alola</span>
+            </button>
+          </div>
+          <div class="result-display" id="regionResult">
+            <span class="result-text">Clique pour découvrir ta région !</span>
+          </div>
+        </div>
+
+        <!-- Roue des types -->
+        <div class="wheel-card">
+          <div class="wheel-header">
+            <div class="wheel-title">
+              <span class="emoji">🔮</span><span>Roue des types</span>
+            </div>
+            <span class="step-badge">Étape 2</span>
+          </div>
+          <div class="wheel-container">
+            <div class="pointer"></div>
+            <canvas id="typeCanvas"></canvas>
+            <div class="center-circle">
+              <img src="https://agi-prod-file-upload-public-main-use1.s3.amazonaws.com/bbbb37cd-db4c-4420-8163-dfa0b8d9c860" alt="Pokéball">
+            </div>
+          </div>
+          <div class="controls">
+            <button class="btn btn-primary" id="spinTypeBtn" disabled>
+              <span>Tourner la roue</span>
+            </button>
+            <span class="status-pill">
+              <span class="dot"></span><span>Active après la région</span>
+            </span>
+          </div>
+          <div class="result-display" id="typeResult">
+            <span class="result-text">Tourne d’abord la roue des régions.</span>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <button id="spinBtn">Tourner</button>
-    <div id="result" class="result"></div>
-    <div class="sub">Clique sur le bouton pour lancer la roue</div>
+    <!-- Colonne droite : roue Pokémon finale -->
+    <div class="card">
+      <div class="card-header">
+        <div>
+          <div class="card-title">
+            <span class="icon">✨</span><span>Roue Pokémon finale</span>
+          </div>
+          <div class="card-subtitle">
+            Tire un Pokémon selon la région et le type choisis.
+          </div>
+        </div>
+        <span class="tag">Étape 3</span>
+      </div>
+
+      <div class="summary-card">
+        <div class="summary-title">Combinaison actuelle</div>
+        <div class="summary-value" id="comboInfo">
+          Région : — | Type : —
+        </div>
+      </div>
+
+      <div class="wheel-card" style="margin-top:0.75rem;">
+        <div class="wheel-header">
+          <div class="wheel-title">
+            <span class="emoji">🎲</span><span>Roue des Pokémon</span>
+          </div>
+          <span class="step-badge">Étape 3</span>
+        </div>
+        <div class="wheel-container">
+          <div class="pointer"></div>
+          <canvas id="pokemonCanvas"></canvas>
+          <div class="center-circle">
+            <img src="https://agi-prod-file-upload-public-main-use1.s3.amazonaws.com/3d3b1b2c-94fa-4348-98b7-b25ba4fcae82" alt="Pokéball">
+          </div>
+        </div>
+        <div class="controls">
+          <button class="btn btn-primary" id="spinPokemonBtn" disabled>
+            <span>Tourner la roue Pokémon</span>
+          </button>
+          <span class="status-pill" id="pokemonCountInfo">
+            <span class="dot"></span><span>En attente d’une combinaison</span>
+          </span>
+        </div>
+        <div class="result-display" id="pokemonResult">
+          <span class="result-text">
+            Tourne une région puis un type pour débloquer cette roue.
+          </span>
+        </div>
+        <div class="pokemon-meta" id="pokemonMeta"></div>
+        <div class="hint">
+          La roue est constituée des Pokémon de la région et du type sélectionnés.
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
-    const items = [
-      "100€",
-      "Perdu",
-      "Skin rare",
-      "50€",
-      "Bonus",
-      "Jackpot"
+    /************ Données régions / types ************/
+    const regions = [
+      { name: "Kanto",  color: "#FF6B6B", emoji: "🗼", gen: "1G", textColor: "#fff" },
+      { name: "Johto",  color: "#4ECDC4", emoji: "⛰️", gen: "2G", textColor: "#000" },
+      { name: "Hoenn",  color: "#45B7D1", emoji: "🏝️", gen: "3G", textColor: "#fff" },
+      { name: "Sinnoh", color: "#96CEB4", emoji: "🏔️", gen: "4G", textColor: "#000" },
+      { name: "Unys",   color: "#FFEAA7", emoji: "🌆", gen: "5G", textColor: "#000" },
+      { name: "Kalos",  color: "#DFE6E9", emoji: "🏰", gen: "6G", textColor: "#000" },
+      { name: "Alola",  color: "#FD79A8", emoji: "🌴", gen: "7G", textColor: "#fff" }
     ];
 
-    const wheel = document.getElementById("wheel");
-    const result = document.getElementById("result");
-    const spinBtn = document.getElementById("spinBtn");
+    const types = [
+      { name: "Normal",   color: "#A8A878", emoji: "⬜", textColor: "#000" },
+      { name: "Feu",      color: "#F08030", emoji: "🔥", textColor: "#fff" },
+      { name: "Eau",      color: "#6890F0", emoji: "💧", textColor: "#fff" },
+      { name: "Plante",   color: "#78C850", emoji: "🌿", textColor: "#000" },
+      { name: "Électrik", color: "#F8D030", emoji: "⚡", textColor: "#000" },
+      { name: "Glace",    color: "#98D8D8", emoji: "❄️", textColor: "#000" },
+      { name: "Combat",   color: "#C03028", emoji: "👊", textColor: "#fff" },
+      { name: "Poison",   color: "#A040A0", emoji: "☠️", textColor: "#fff" },
+      { name: "Sol",      color: "#E0C068", emoji: "🌋", textColor: "#000" },
+      { name: "Vol",      color: "#A890F0", emoji: "🕊️", textColor: "#fff" },
+      { name: "Psy",      color: "#F85888", emoji: "🔮", textColor: "#fff" },
+      { name: "Insecte",  color: "#A8B820", emoji: "🐛", textColor: "#000" },
+      { name: "Roche",    color: "#B8A038", emoji: "🪨", textColor: "#fff" },
+      { name: "Spectre",  color: "#705898", emoji: "👻", textColor: "#fff" },
+      { name: "Dragon",   color: "#7038F8", emoji: "🐉", textColor: "#fff" },
+      { name: "Ténèbres", color: "#705848", emoji: "🌑", textColor: "#fff" },
+      { name: "Acier",    color: "#B8B8D0", emoji: "⚙️", textColor: "#000" },
+      { name: "Fée",      color: "#EE99AC", emoji: "✨", textColor: "#000" }
+    ];
 
-    const segmentCount = items.length;
-    const segmentAngle = 360 / segmentCount;
+    /************ BDD Pokémon intégrée ************/
+    const pokemonData = {
+      "Kanto": {
+        "Plante": ["Bulbizarre","Herbizarre","Florizarre","Mystherbe","Ortide","Rafflesia","Paras","Parasect","Chétiflor","Boustiflor","Empiflor","Noeunoeuf","Noadkoko","Saquedeneu"],
+        "Poison": ["Bulbizarre","Herbizarre","Florizarre","Aspicot","Coconfort","Dardargnan","Abo","Arbok","Nidoran♀","Nidorina","Nidoqueen","Nidoran♂","Nidorino","Nidoking","Nosferapti","Nosferalto","Mystherbe","Ortide","Rafflesia","Mimitoss","Aéromite","Chétiflor","Boustiflor","Empiflor","Tentacool","Tentacruel","Tadmorv","Grotadmorv","Fantominus","Spectrum","Ectoplasma","Smogo","Smogogo"],
+        "Feu": ["Salamèche","Reptincel","Dracaufeu","Goupix","Feunard","Caninos","Arcanin","Ponyta","Galopa","Magmar","Pyroli","Sulfura"],
+        "Vol": ["Dracaufeu","Papilusion","Roucool","Roucoups","Roucarnage","Piafabec","Rapasdepic","Nosferapti","Nosferalto","Canarticho","Doduo","Dodrio","Insécateur","Léviator","Ptéra","Artikodin","Électhor","Sulfura","Dracolosse"],
+        "Eau": ["Carapuce","Carabaffe","Tortank","Psykokwak","Akwakwak","Ptitard","Têtarte","Tartard","Tentacool","Tentacruel","Ramoloss","Flagadoss","Otaria","Lamantine","Kokiyas","Crustabri","Krabby","Krabboss","Hypotrempe","Hypocéan","Poissirène","Poissoroy","Stari","Staross","Magicarpe","Léviator","Lokhlass","Aquali","Amonita","Amonistar","Kabuto","Kabutops"],
+        "Insecte": ["Chenipan","Chrysacier","Papilusion","Aspicot","Coconfort","Dardargnan","Paras","Parasect","Mimitoss","Aéromite","Insécateur","Scarabrute"],
+        "Normal": ["Roucool","Roucoups","Roucarnage","Rattata","Rattatac","Piafabec","Rapasdepic","Rondoudou","Grodoudou","Miaouss","Persian","Canarticho","Doduo","Dodrio","Excelangue","Leveinard","Kangourex","Tauros","Métamorph","Évoli","Porygon","Ronflex"],
+        "Électrik": ["Pikachu","Raichu","Magnéti","Magnéton","Voltorbe","Électrode","Élektek","Voltali","Électhor"],
+        "Sol": ["Sabelette","Sablaireau","Nidoqueen","Nidoking","Taupiqueur","Triopikeur","Racaillou","Gravalanch","Grolem","Onix","Osselait","Ossatueur","Rhinocorne","Rhinoféros"],
+        "Fée": ["Mélofée","Mélodelfe","Rondoudou","Grodoudou","M. Mime"],
+        "Combat": ["Férosinge","Colossinge","Tartard","Machoc","Machopeur","Mackogneur","Kicklee","Tygnon"],
+        "Psy": ["Abra","Kadabra","Alakazam","Ramoloss","Flagadoss","Soporifik","Hypnomade","Noeunoeuf","Noadkoko","Staross","M. Mime","Lippoutou","Mewtwo","Mew"],
+        "Roche": ["Racaillou","Gravalanch","Grolem","Onix","Rhinocorne","Rhinoféros","Amonita","Amonistar","Kabuto","Kabutops","Ptéra"],
+        "Acier": ["Magnéti","Magnéton"],
+        "Glace": ["Lamantine","Crustabri","Lippoutou","Lokhlass","Artikodin"],
+        "Spectre": ["Fantominus","Spectrum","Ectoplasma"],
+        "Dragon": ["Minidraco","Draco","Dracolosse"]
+      },
+      "Johto": {
+        "Plante": ["Germignon","Macronium","Méganium","Joliflor","Granivol","Floravol","Cotovol","Tournegrin","Héliatronc","Celebi"],
+        "Feu": ["Héricendre","Feurisson","Typhlosion","Limagma","Volcaropod","Malosse","Démolosse","Magby","Entei","Ho-Oh"],
+        "Eau": ["Kaiminus","Crocrodil","Aligatueur","Loupio","Lanturn","Marill","Azumarill","Tarpaud","Axoloto","Maraiste","Roigada","Qwilfish","Corayon","Rémoraid","Octillery","Démanta","Hyporoi","Suicune"],
+        "Normal": ["Fouinette","Fouinar","Hoothoot","Noarfang","Toudoudou","Capumain","Girafarig","Insolourdo","Teddiursa","Ursaring","Porygon2","Cerfrousse","Queulorior","Écrémeuh","Leuphorie"],
+        "Vol": ["Hoothoot","Noarfang","Coxy","Coxyclaque","Nostenfer","Togetic","Natu","Xatu","Granivol","Floravol","Cotovol","Yanma","Cornèbre","Scorplane","Cadoizo","Démanta","Airmure","Lugia","Ho-Oh"],
+        "Insecte": ["Coxy","Coxyclaque","Mimigal","Migalos","Yanma","Pomdepik","Foretress","Cizayox","Caratroc","Scarhino"],
+        "Poison": ["Mimigal","Migalos","Nostenfer","Qwilfish"],
+        "Électrik": ["Loupio","Lanturn","Pichu","Wattouat","Lainergie","Pharamp","Élekid","Raikou"],
+        "Fée": ["Mélo","Toudoudou","Togepi","Togetic","Marill","Azumarill","Snubbull","Granbull"],
+        "Psy": ["Natu","Xatu","Mentali","Roigada","Zarbi","Qulbutoké","Girafarig","Lippouti","Lugia","Celebi"],
+        "Roche": ["Simularbre","Caratroc","Volcaropod","Corayon","Embrylex","Ymphect","Tyranocif"],
+        "Sol": ["Axoloto","Maraiste","Scorplane","Steelix","Marcacrin","Cochignon","Phanpy","Donphan","Embrylex","Ymphect"],
+        "Ténèbres": ["Noctali","Cornèbre","Farfuret","Malosse","Démolosse","Tyranocif"],
+        "Spectre": ["Feuforêve"],
+        "Acier": ["Foretress","Steelix","Cizayox","Airmure"],
+        "Combat": ["Scarhino","Debugant","Kapoera"],
+        "Glace": ["Farfuret","Marcacrin","Cochignon","Cadoizo","Lippouti"],
+        "Dragon": ["Hyporoi"]
+      },
+      "Hoenn": {
+        "Plante": ["Arcko","Massko","Jungko","Nénupiot","Lombre","Ludicolo","Grainipiot","Pifeuil","Tengalice","Balignon","Chapignon","Rosélia","Cacnea","Cacturne","Lilia","Vacilys","Tropius"],
+        "Feu": ["Poussifeu","Galifeu","Braségali","Chamallot","Camérupt","Chartor"],
+        "Combat": ["Galifeu","Braségali","Chapignon","Makuhita","Hariyama","Méditikka","Charmina"],
+        "Eau": ["Gobou","Flobio","Laggron","Nénupiot","Lombre","Ludicolo","Goélise","Bekipan","Arakdo","Carvanha","Sharpedo","Wailmer","Wailord","Barloche","Barbicha","Écrapince","Colhomard","Barpau","Milobellus","Obalie","Phogleur","Kaimorse","Coquiperl","Serpang","Rosabyss","Relicanth","Lovdisc","Kyogre"],
+        "Sol": ["Flobio","Laggron","Ningale","Chamallot","Camérupt","Kraknoix","Vibraninf","Libégon","Barloche","Barbicha","Balbuto","Kaorine","Groudon"],
+        "Ténèbres": ["Medhyèna","Grahyèna","Pifeuil","Tengalice","Ténéfix","Carvanha","Sharpedo","Cacturne","Colhomard","Absol"],
+        "Normal": ["Zigzaton","Linéon","Nirondelle","Hélédelle","Parecool","Vigoroth","Monaflèmit","Chuchmur","Ramboum","Brouhabam","Azurill","Skitty","Delcatty","Spinda","Tylton","Mangriff","Morphéo","Kecleon"],
+        "Insecte": ["Chenipotte","Armulys","Charmillon","Blindalys","Papinox","Arakdo","Maskadra","Ningale","Ninjask","Munja","Muciole","Lumivole","Anorith","Armaldo"],
+        "Vol": ["Charmillon","Nirondelle","Hélédelle","Goélise","Bekipan","Maskadra","Ninjask","Tylton","Altaria","Tropius","Drattak","Rayquaza"],
+        "Poison": ["Papinox","Rosélia","Gloupti","Avaltout","Séviper"],
+        "Psy": ["Tarsal","Kirlia","Gardevoir","Méditikka","Charmina","Spoink","Groret","Séléroc","Solaroc","Balbuto","Kaorine","Éoko","Okéoké","Terhal","Métang","Métalosse","Latias","Latios","Jirachi","Deoxys"],
+        "Fée": ["Tarsal","Kirlia","Gardevoir","Azurill","Mysdibule"],
+        "Spectre": ["Munja","Ténéfix","Polichombr","Branette","Skelénox","Téraclope"],
+        "Roche": ["Tarinor","Galekid","Galegon","Galeking","Séléroc","Solaroc","Lilia","Vacilys","Anorith","Armaldo","Relicanth","Regirock"],
+        "Acier": ["Mysdibule","Galekid","Galegon","Galeking","Terhal","Métang","Métalosse","Registeel","Jirachi"],
+        "Électrik": ["Dynavolt","Élecsprint","Posipi","Négapi"],
+        "Dragon": ["Vibraninf","Libégon","Altaria","Draby","Drackhaus","Drattak","Latias","Latios","Rayquaza"],
+        "Glace": ["Stalgamin","Oniglali","Obalie","Phogleur","Kaimorse","Regice"]
+      },
+      "Sinnoh": {
+        "Plante": ["Tortipouss","Boskara","Torterra","Rozbouton","Roserade","Cheniselle","Ceribou","Ceriflor","Vortente","Blizzi","Blizzaroi","Bouldeneu","Phyllali","Shaymin"],
+        "Sol": ["Torterra","Tritosor","Griknot","Carmache","Carchacrok","Hippopotas","Hippodocus","Rhinastoc","Scorvol","Mammochon"],
+        "Feu": ["Ouisticram","Chimpenfeu","Simiabraz","Maganon","Heatran"],
+        "Combat": ["Chimpenfeu","Simiabraz","Riolu","Lucario","Cradopaud","Coatox","Gallame"],
+        "Eau": ["Tiplouf","Prinplouf","Pingoléon","Castorno","Mustébouée","Mustéflott","Sancoki","Tritosor","Écayon","Luminéon","Babimanta","Palkia","Phione","Manaphy"],
+        "Acier": ["Pingoléon","Dinoclier","Bastiodon","Archéomire","Archéodong","Lucario","Magnézone","Tarinorme","Dialga","Heatran"],
+        "Normal": ["Étourmi","Étourvol","Étouraptor","Keunotor","Castorno","Capidextre","Laporeille","Lockpin","Chaglam","Chaffreux","Ptiravi","Pijako","Goinfrex","Coudlangue","Porygon-Z","Regigigas","Arceus"],
+        "Vol": ["Étourmi","Étourvol","Étouraptor","Papilord","Apitrini","Apireine","Baudrive","Grodrive","Corboss","Pijako","Babimanta","Togekiss","Yanmega","Scorvol"],
+        "Insecte": ["Crikzik","Mélokrik","Cheniti","Cheniselle","Papilord","Apitrini","Apireine","Rapion","Yanmega"],
+        "Électrik": ["Lixy","Luxio","Luxray","Pachirisu","Magnézone","Élekable","Motisma"],
+        "Poison": ["Rozbouton","Roserade","Moufouette","Moufflair","Rapion","Drascore","Cradopaud","Coatox"],
+        "Roche": ["Kranidos","Charkos","Dinoclier","Bastiodon","Manzaï","Rhinastoc","Tarinorme"],
+        "Spectre": ["Baudrive","Grodrive","Magirêve","Spiritomb","Noctunoir","Momartik","Motisma","Giratina"],
+        "Ténèbres": ["Corboss","Moufouette","Moufflair","Spiritomb","Drascore","Dimoret","Darkrai"],
+        "Psy": ["Korillon","Archéomire","Archéodong","Mime Jr","Gallame","Créhelf","Créfollet","Créfadet","Cresselia"],
+        "Fée": ["Mime Jr","Togekiss"],
+        "Dragon": ["Griknot","Carmache","Carchacrok","Dialga","Palkia","Giratina"],
+        "Glace": ["Blizzi","Blizzaroi","Dimoret","Givrali","Mammochon","Momartik"]
+      },
+      "Unys": {
+        "Psy": ["Victini","Munna","Mushana","Chovsourir","Rhinolove","Cryptéro","Scrutella","Mesmérella","Sidérella","Nucléos","Méios","Symbios","Lewsor","Neitram","Meloetta"],
+        "Feu": ["Victini","Gruikui","Grotichon","Roitiflam","Flamajou","Flamoutan","Darumarond","Darumacho","Funécire","Mélancolux","Lugulabre","Aflamanoir","Pyronille","Pyrax","Reshiram"],
+        "Plante": ["Vipélierre","Lianaja","Majaspic","Feuillajou","Feuiloutan","Larveyette","Couverdure","Manternel","Doudouvet","Farfaduvet","Chlorobule","Fragilady","Maracachi","Vivaldaim","Haydaim","Trompignon","Gaulet","Grindur","Noacier","Viridium"],
+        "Combat": ["Grotichon","Roitiflam","Charpenti","Ouvrifier","Bétochef","Judokrak","Karaclée","Baggiguane","Baggaïd","Kungfouine","Shaofouine","Cobaltium","Terrakium","Viridium","Keldeo"],
+        "Eau": ["Moustillon","Mateloutre","Clamiral","Flotajou","Flotoutan","Tritonde","Batracné","Crapustule","Bargantua","Carapagos","Mégapagos","Couaneton","Lakmécygne","Viskuse","Moyade","Mamanbo","Keldeo"],
+        "Normal": ["Ratentif","Miradar","Ponchiot","Ponchien","Mastouffe","Poichigeon","Colombeau","Déflaisan","Nanméouïe","Chinchidou","Pashmilla","Vivaldaim","Haydaim","Frison","Furaiglon","Gueriaigle","Meloetta"],
+        "Ténèbres": ["Chacripan","Léopardus","Mascaïman","Escroco","Crocorible","Baggiguane","Baggaïd","Zorua","Zoroark","Scalpion","Scalproie","Vostourno","Vaututrice","Solochi","Diamat","Trioxhydre"],
+        "Vol": ["Poichigeon","Colombeau","Déflaisan","Chovsourir","Rhinolove","Cryptéro","Arkéapti","Aéroptéryx","Couaneton","Lakmécygne","Emolga","Furaiglon","Gueriaigle","Vostourno","Vaututrice","Boréas","Fulguris","Démétéros"],
+        "Électrik": ["Zébibron","Zéblitz","Emolga","Statitik","Mygavolt","Anchwatt","Lampéroie","Ohmassacre","Limonde","Fulguris","Zekrom"],
+        "Roche": ["Nodulithe","Géolithe","Gigalithe","Crabicoque","Crabaraque","Carapagos","Mégapagos","Arkéapti","Aéroptéryx","Terrakium"],
+        "Sol": ["Rototaupe","Minotaupe","Batracné","Crapustule","Mascaïman","Escroco","Crocorible","Limonde","Gringolem","Golemastoc","Démétéros"],
+        "Acier": ["Minotaupe","Lançargot","Grindur","Noacier","Tic","Clic","Cliticlic","Scalpion","Scalproie","Fermite","Cobaltium","Genesect"],
+        "Insecte": ["Larveyette","Couverdure","Manternel","Venipatte","Scobolide","Brutapode","Crabicoque","Crabaraque","Carabing","Lançargot","Statitik","Mygavolt","Escargaume","Limaspeed","Fermite","Pyronille","Pyrax","Genesect"],
+        "Poison": ["Venipatte","Scobolide","Brutapode","Miamiasme","Miasmax","Trompignon","Gaulet"],
+        "Fée": ["Doudouvet","Farfaduvet"],
+        "Spectre": ["Tutafeh","Tutankafer","Viskuse","Moyade","Funécire","Mélancolux","Lugulabre","Gringolem","Golemastoc"],
+        "Glace": ["Sorbébé","Sorboul","Sorbouboul","Polarhume","Polagriffe","Hexagel","Kyurem"],
+        "Dragon": ["Coupenotte","Incisache","Tranchodon","Drakkarmin","Solochi","Diamat","Trioxhydre","Reshiram","Zekrom","Kyurem"]
+      },
+      "Kalos": {
+        "Plante": ["Marisson","Boguérisse","Blindépique","Cabriolaine","Chevroum","Brocélôme","Desséliande","Pitrouille","Banshitrouye"],
+        "Combat": ["Blindépique","Pandespiègle","Pandarbare","Brutalibré"],
+        "Feu": ["Feunnec","Roussil","Goupelin","Braisillon","Flambusard","Hélionceau","Némélios","Volcanion"],
+        "Psy": ["Goupelin","Psystigri","Mistigrix","Sepiatop","Sepiatroce","Hoopa"],
+        "Eau": ["Grenousse","Croâporal","Amphinobi","Opermine","Golgopathe","Venalgue","Flingouste","Gamblast","Volcanion"],
+        "Ténèbres": ["Amphinobi","Pandarbare","Sepiatop","Sepiatroce","Yveltal"],
+        "Normal": ["Sapereau","Excavarenne","Passerouge","Hélionceau","Némélios","Couafarel","Galvaran","Iguolta"],
+        "Sol": ["Excavarenne","Zygarde"],
+        "Vol": ["Passerouge","Braisillon","Flambusard","Prismillon","Brutalibré","Sonistrelle","Bruyverne","Yveltal"],
+        "Insecte": ["Lépidonille","Pérégrain","Prismillon"],
+        "Fée": ["Flabébé","Floette","Florges","Fluvetin","Cocotine","Sucroquin","Cupcanaille","Nymphali","Dedenne","Strassie","Trousselin","Xerneas","Diancie"],
+        "Acier": ["Monorpale","Dimoclès","Exagide","Trousselin"],
+        "Spectre": ["Monorpale","Dimoclès","Exagide","Brocélôme","Desséliande","Pitrouille","Banshitrouye","Hoopa"],
+        "Roche": ["Opermine","Golgopathe","Ptyranidur","Rexillius","Amagara","Dragmara","Strassie","Diancie"],
+        "Poison": ["Venalgue","Kravarech"],
+        "Dragon": ["Kravarech","Ptyranidur","Rexillius","Mucuscule","Colimucus","Muplodocus","Sonistrelle","Bruyverne","Zygarde"],
+        "Électrik": ["Galvaran","Iguolta","Dedenne"],
+        "Glace": ["Amagara","Dragmara","Grelaçon","Séracrawl"]
+      },
+      "Alola": {
+        "Plante": ["Brindibou","Efflèche","Archéduc","Mimantis","Floramantis","Spododo","Lampignon","Croquine","Candine","Sucreine","Sinistrail","Tokotoro","Katagami"],
+        "Vol": ["Brindibou","Efflèche","Picassaut","Piclairon","Bazoucan","Plumeline","Météno","Bamboiselle"],
+        "Spectre": ["Archéduc","Bacabouh","Trépassable","Mimiqui","Sinistrail","Lunala","Marshadow","Pierroteknik"],
+        "Feu": ["Flamiaou","Matoufeu","Félinferno","Plumeline","Tritox","Malamandre","Boumata","Pierroteknik"],
+        "Ténèbres": ["Félinferno","Engloutyran"],
+        "Eau": ["Otaquin","Otarlette","Oratoria","Froussardine","Vorastérie","Prédastérie","Araqua","Tarenbulle","Sovkipou","Sarmuraï","Concombaffe","Denticrisse","Tokopisco"],
+        "Fée": ["Oratoria","Bombydou","Rubombelle","Spododo","Lampignon","Guérilande","Mimiqui","Tokorico","Tokopiyon","Tokotoro","Tokopisco","Magearna"],
+        "Normal": ["Picassaut","Piclairon","Bazoucan","Manglouton","Argouste","Nounourson","Chelours","Gouroutan","Type:0","Silvallié","Dodoala","Draïeul"],
+        "Insecte": ["Larvibule","Chrysapile","Lucanon","Bombydou","Rubombelle","Araqua","Tarenbulle","Sovkipou","Sarmuraï","Mouscoto","Cancrelove"],
+        "Électrik": ["Chrysapile","Lucanon","Togedemaru","Tokorico","Câblifère","Zeraora"],
+        "Combat": ["Crabagarre","Crabominable","Nounourson","Chelours","Quartermac","Écaïd","Ékaïser","Mouscoto","Cancrelove","Marshadow"],
+        "Glace": ["Crabominable"],
+        "Roche": ["Rocabot","Lougaroc","Météno","Zéroïd","Ama - Ama"],
+        "Poison": ["Vorastérie","Prédastérie","Tritox","Malamandre","Zéroïd","Vémini","Mandrillon"],
+        "Sol": ["Tiboudet","Bourrinos","Bacabouh","Trépassable"],
+        "Psy": ["Gouroutan","Denticrisse","Tokopiyon","Cosmog","Cosmovum","Solgaleo","Lunala","Necrozma"],
+        "Dragon": ["Boumata","Draïeul","Bébécaille","Écaïd","Ékaïser","Engloutyran","Mandrillon"],
+        "Acier": ["Togedemaru","Solgaleo","Bamboiselle","Katagami","Magearna","Ama - Ama","Meltan","Melmetal"]
+      }
+    };
+    /* JSON original intégré directement. [file:51] */
 
-    let currentRotation = 0;
-    let isSpinning = false;
+    /************ États & canvas ************/
+    let selectedRegion = null;
+    let selectedType = null;
+    let currentPokemonList = [];
 
-    function createLabels() {
-      items.forEach((item, i) => {
-        const label = document.createElement("div");
-        label.className = "label";
+    const regionCanvas = document.getElementById("regionCanvas");
+    const regionCtx = regionCanvas.getContext("2d");
 
-        const angle = i * segmentAngle + segmentAngle / 2;
-        label.style.transform = `rotate(${angle}deg) translate(90px) rotate(90deg)`;
-        label.textContent = item;
+    const typeCanvas = document.getElementById("typeCanvas");
+    const typeCtx = typeCanvas.getContext("2d");
 
-        wheel.appendChild(label);
+    const pokemonCanvas = document.getElementById("pokemonCanvas");
+    const pokemonCtx = pokemonCanvas.getContext("2d");
+
+    const spinRegionBtn = document.getElementById("spinRegionBtn");
+    const spinTypeBtn = document.getElementById("spinTypeBtn");
+    const spinPokemonBtn = document.getElementById("spinPokemonBtn");
+
+    const regionResultDiv = document.getElementById("regionResult");
+    const typeResultDiv = document.getElementById("typeResult");
+    const pokemonResultDiv = document.getElementById("pokemonResult");
+    const pokemonMetaDiv = document.getElementById("pokemonMeta");
+    const comboInfoDiv = document.getElementById("comboInfo");
+    const pokemonCountInfo = document.getElementById("pokemonCountInfo");
+
+    let regionRotation = 0;
+    let regionSpinning = false;
+    let typeRotation = 0;
+    let typeSpinning = false;
+    let pokemonRotation = 0;
+    let pokemonSpinning = false;
+
+    /************ Utilitaires ************/
+    function resizeWheel(canvas, drawFn) {
+      const container = canvas.parentElement;
+      const size = Math.min(container.clientWidth, container.clientWidth);
+      canvas.width = size;
+      canvas.height = size;
+      drawFn();
+    }
+
+    function getPokemonList(region, type) {
+      const regionObj = pokemonData[region];
+      if (!regionObj) return [];
+      return regionObj[type] || [];
+    }
+
+    /************ Roue régions ************/
+    function drawRegionWheel() {
+      const ctx = regionCtx;
+      const canvas = regionCanvas;
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const radius = canvas.width / 2 - 10;
+      const sliceAngle = 2 * Math.PI / regions.length;
+
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+
+      const gradient = ctx.createRadialGradient(cx,cy,radius*0.1,cx,cy,radius);
+      gradient.addColorStop(0,"rgba(15,23,42,0.9)");
+      gradient.addColorStop(1,"rgba(0,0,0,1)");
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(cx,cy,radius+6,0,2*Math.PI);
+      ctx.fill();
+
+      regions.forEach((region, i) => {
+        const startAngle = regionRotation + i * sliceAngle;
+        const endAngle = startAngle + sliceAngle;
+
+        ctx.beginPath();
+        ctx.moveTo(cx,cy);
+        ctx.arc(cx,cy,radius,startAngle,endAngle);
+        ctx.closePath();
+        ctx.fillStyle = region.color;
+        ctx.fill();
+
+        ctx.strokeStyle = "#ffffff";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.translate(cx,cy);
+        ctx.rotate(startAngle + sliceAngle/2);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        const emojiDist = radius * 0.75;
+        ctx.font = `${canvas.width*0.08}px Arial`;
+        ctx.fillStyle = region.textColor;
+        ctx.fillText(region.emoji, emojiDist, 0);
+
+        const textDist = radius * 0.52;
+        ctx.font = `bold ${canvas.width*0.045}px Arial`;
+        ctx.fillText(region.name, textDist, -canvas.width*0.02);
+
+        ctx.font = `${canvas.width*0.03}px Arial`;
+        ctx.fillText(region.gen, textDist, canvas.width*0.025);
+
+        ctx.restore();
       });
     }
 
-    createLabels();
+    function spinRegionWheel() {
+      if (regionSpinning) return;
+      regionSpinning = true;
+      spinRegionBtn.disabled = true;
+      spinRegionBtn.classList.add("spinning");
+      regionResultDiv.innerHTML = '<span class="result-text">La roue tourne...</span>';
 
-    function spinWheel() {
-      if (isSpinning) return;
+      const minSpins = 5, maxSpins = 8;
+      const spins = minSpins + Math.random() * (maxSpins - minSpins);
+      const targetRot = regionRotation + spins * 2 * Math.PI;
+      const duration = 4000;
+      const startTime = Date.now();
+      const startRot = regionRotation;
 
-      isSpinning = true;
-      spinBtn.disabled = true;
-      result.textContent = "";
+      function easeOutCubic(t) { return 1 - Math.pow(1-t,3); }
 
-      const winnerIndex = Math.floor(Math.random() * items.length);
+      function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeOutCubic(progress);
 
-      const targetAngle = 360 - (winnerIndex * segmentAngle + segmentAngle / 2);
+        regionRotation = startRot + (targetRot - startRot) * eased;
+        drawRegionWheel();
 
-      const extraSpins = 360 * (5 + Math.floor(Math.random() * 3));
-      currentRotation += extraSpins + targetAngle;
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          regionRotation = regionRotation % (2 * Math.PI);
+          const sliceAngle = 2 * Math.PI / regions.length;
+          const pointerAngle = -Math.PI / 2; // flèche en haut
+          const angleFromPointer =
+            (pointerAngle - regionRotation + 2*Math.PI) % (2*Math.PI);
+          const selectedIndex =
+            Math.floor(angleFromPointer / sliceAngle) % regions.length;
+          const region = regions[selectedIndex];
 
-      wheel.style.transform = `rotate(${currentRotation}deg)`;
+          regionResultDiv.innerHTML = `
+            <span class="result-emoji">${region.emoji}</span>
+            <span class="result-text">Région <strong>${region.name}</strong> (${region.gen})</span>
+          `;
+          selectedRegion = region.name;
+          comboInfoDiv.textContent =
+            `Région : ${selectedRegion} | Type : ${selectedType || "—"}`;
+          spinTypeBtn.disabled = false;
 
-      setTimeout(() => {
-        result.textContent = "Tombé sur : " + items[winnerIndex];
-        isSpinning = false;
-        spinBtn.disabled = false;
-      }, 5200);
+          // reset roue Pokémon car nouvelle région
+          currentPokemonList = [];
+          spinPokemonBtn.disabled = true;
+          pokemonResultDiv.innerHTML =
+            '<span class="result-text">Choisis d’abord un type.</span>';
+          pokemonMetaDiv.textContent = "";
+          pokemonCountInfo.innerHTML =
+            '<span class="dot"></span><span>En attente d’une combinaison</span>';
+          drawPokemonWheel();
+
+          regionSpinning = false;
+          spinRegionBtn.disabled = false;
+          spinRegionBtn.classList.remove("spinning");
+        }
+      }
+      animate();
     }
 
-    spinBtn.addEventListener("click", spinWheel);
+    /************ Roue types ************/
+    function drawTypeWheel() {
+      const ctx = typeCtx;
+      const canvas = typeCanvas;
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const radius = canvas.width / 2 - 10;
+      const sliceAngle = 2 * Math.PI / types.length;
+
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.save();
+      ctx.translate(cx,cy);
+      ctx.rotate(typeRotation);
+
+      types.forEach((type, i) => {
+        const startAngle = i * sliceAngle;
+        const endAngle = startAngle + sliceAngle;
+
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.arc(0,0,radius,startAngle,endAngle);
+        ctx.closePath();
+
+        ctx.fillStyle = type.color;
+        ctx.fill();
+
+        ctx.strokeStyle = "#2c3e50";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.rotate(startAngle + sliceAngle/2);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        const textRadius = radius * 0.65;
+        ctx.translate(textRadius,0);
+
+        ctx.fillStyle = type.textColor;
+        ctx.font = `bold ${canvas.width*0.04}px system-ui`;
+        ctx.fillText(type.name,0,-canvas.width*0.02);
+
+        ctx.font = `${canvas.width*0.06}px Arial`;
+        ctx.fillText(type.emoji,0,canvas.width*0.03);
+
+        ctx.restore();
+      });
+
+      ctx.beginPath();
+      ctx.arc(0,0,radius,0,2*Math.PI);
+      ctx.strokeStyle = "#ecf0f1";
+      ctx.lineWidth = 6;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function spinTypeWheel() {
+      if (typeSpinning || !selectedRegion) return;
+      typeSpinning = true;
+      spinTypeBtn.disabled = true;
+      spinTypeBtn.classList.add("spinning");
+      typeResultDiv.innerHTML = '<span class="result-text">La roue tourne...</span>';
+
+      const sliceAngle = 2 * Math.PI / types.length;
+
+      const winningIndex = Math.floor(Math.random() * types.length);
+      const winningSliceCenter = winningIndex * sliceAngle + sliceAngle / 2;
+      const pointerAngle = -Math.PI / 2;
+      const currentRotation = typeRotation % (2 * Math.PI);
+      const baseRotation = currentRotation + 6 * 2 * Math.PI;
+      const alignRotation = pointerAngle - winningSliceCenter - currentRotation;
+      const targetRotation = baseRotation + alignRotation;
+
+      const duration = 4000;
+      const startTime = Date.now();
+      const startRot = typeRotation;
+
+      function easeOutCubic(t) { return 1 - Math.pow(1-t,3); }
+
+      function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeOutCubic(progress);
+
+        typeRotation = startRot + (targetRotation - startRot) * eased;
+        drawTypeWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          typeRotation = targetRotation % (2 * Math.PI);
+
+          const type = types[winningIndex];
+          typeResultDiv.innerHTML = `
+            <span class="result-emoji">${type.emoji}</span>
+            <span class="result-text">Type <strong>${type.name}</strong></span>
+          `;
+          selectedType = type.name;
+          comboInfoDiv.textContent =
+            `Région : ${selectedRegion} | Type : ${selectedType}`;
+
+          // Met à jour la liste de Pokémon et la roue finale
+          currentPokemonList = getPokemonList(selectedRegion, selectedType);
+          if (currentPokemonList.length > 0) {
+            spinPokemonBtn.disabled = false;
+            pokemonCountInfo.innerHTML =
+              `<span class="dot"></span><span>${currentPokemonList.length} Pokémon possibles</span>`;
+            pokemonResultDiv.innerHTML =
+              '<span class="result-text">Clique pour tirer un Pokémon !</span>';
+          } else {
+            spinPokemonBtn.disabled = true;
+            pokemonCountInfo.innerHTML =
+              '<span class="dot"></span><span>Aucun Pokémon pour cette combinaison</span>';
+            pokemonResultDiv.innerHTML =
+              '<span class="result-text">Aucun Pokémon pour cette combinaison.</span>';
+          }
+          pokemonMetaDiv.textContent = "";
+          pokemonRotation = 0;
+          drawPokemonWheel();
+
+          typeSpinning = false;
+          spinTypeBtn.disabled = false;
+          spinTypeBtn.classList.remove("spinning");
+        }
+      }
+      animate();
+    }
+
+    /************ Roue Pokémon ************/
+    function drawPokemonWheel() {
+      const ctx = pokemonCtx;
+      const canvas = pokemonCanvas;
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2;
+      const radius = canvas.width / 2 - 10;
+
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      ctx.save();
+      ctx.translate(cx,cy);
+      ctx.rotate(pokemonRotation);
+
+      const n = currentPokemonList.length || 1;
+      const sliceAngle = 2 * Math.PI / n;
+
+      for (let i = 0; i < n; i++) {
+        const startAngle = i * sliceAngle;
+        const endAngle = startAngle + sliceAngle;
+
+        ctx.beginPath();
+        ctx.moveTo(0,0);
+        ctx.arc(0,0,radius,startAngle,endAngle);
+        ctx.closePath();
+
+        const baseHue = (i * 137) % 360;
+        ctx.fillStyle = `hsl(${baseHue},70%,55%)`;
+        ctx.fill();
+
+        ctx.strokeStyle = "#2c3e50";
+        ctx.lineWidth = 3;
+        ctx.stroke();
+
+        ctx.save();
+        ctx.rotate(startAngle + sliceAngle/2);
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+
+        const textRadius = radius * 0.70;
+        ctx.translate(textRadius,0);
+
+        const name = currentPokemonList[i] || "?";
+        ctx.fillStyle = "#ffffff";
+        ctx.font = `${canvas.width*0.035}px system-ui`;
+        ctx.fillText(name,0,0);
+
+        ctx.restore();
+      }
+
+      ctx.beginPath();
+      ctx.arc(0,0,radius,0,2*Math.PI);
+      ctx.strokeStyle = "#ecf0f1";
+      ctx.lineWidth = 6;
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function spinPokemonWheel() {
+      if (pokemonSpinning || currentPokemonList.length === 0) return;
+      pokemonSpinning = true;
+      spinPokemonBtn.disabled = true;
+      spinPokemonBtn.classList.add("spinning");
+      pokemonResultDiv.innerHTML = '<span class="result-text">La roue Pokémon tourne...</span>';
+      pokemonMetaDiv.textContent = "";
+
+      const n = currentPokemonList.length;
+      const sliceAngle = 2 * Math.PI / n;
+
+      const winningIndex = Math.floor(Math.random() * n);
+      const winningSliceCenter = winningIndex * sliceAngle + sliceAngle / 2;
+      const pointerAngle = -Math.PI / 2;
+      const currentRotation = pokemonRotation % (2 * Math.PI);
+      const baseRotation = currentRotation + 6 * 2 * Math.PI;
+      const alignRotation = pointerAngle - winningSliceCenter - currentRotation;
+      const targetRotation = baseRotation + alignRotation;
+
+      const duration = 4000;
+      const startTime = Date.now();
+      const startRot = pokemonRotation;
+
+      function easeOutCubic(t) { return 1 - Math.pow(1-t,3); }
+
+      function animate() {
+        const elapsed = Date.now() - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = easeOutCubic(progress);
+
+        pokemonRotation = startRot + (targetRotation - startRot) * eased;
+        drawPokemonWheel();
+
+        if (progress < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          pokemonRotation = targetRotation % (2 * Math.PI);
+          const chosen = currentPokemonList[winningIndex];
+
+          pokemonResultDiv.innerHTML =
+            `<span class="result-text">🎲 Pokémon tiré : <strong>${chosen}</strong></span>`;
+          pokemonMetaDiv.textContent =
+            `Parmi ${currentPokemonList.length} Pokémon de type ${selectedType} dans la région ${selectedRegion}.`;
+
+          pokemonSpinning = false;
+          spinPokemonBtn.disabled = false;
+          spinPokemonBtn.classList.remove("spinning");
+        }
+      }
+
+      animate();
+    }
+
+    /************ Init ************/
+    function init() {
+      resizeWheel(regionCanvas, drawRegionWheel);
+      resizeWheel(typeCanvas, drawTypeWheel);
+      resizeWheel(pokemonCanvas, drawPokemonWheel);
+
+      spinRegionBtn.addEventListener("click", spinRegionWheel);
+      spinTypeBtn.addEventListener("click", spinTypeWheel);
+      spinPokemonBtn.addEventListener("click", spinPokemonWheel);
+
+      window.addEventListener("resize", () => {
+        resizeWheel(regionCanvas, drawRegionWheel);
+        resizeWheel(typeCanvas, drawTypeWheel);
+        resizeWheel(pokemonCanvas, drawPokemonWheel);
+      });
+    }
+
+    init();
   </script>
 </body>
 </html>
+
