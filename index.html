@@ -1,51 +1,250 @@
 <!DOCTYPE html>
-<html>
+<html lang="fr">
 <head>
-<title>Roue</title>
-<style>
-body{
-text-align:center;
-font-family:Arial;
-}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roue</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-#wheel{
-width:300px;
-height:300px;
-border-radius:50%;
-margin:40px auto;
-background:conic-gradient(
-red 0deg 60deg,
-blue 60deg 120deg,
-green 120deg 180deg,
-yellow 180deg 240deg,
-orange 240deg 300deg,
-purple 300deg 360deg
-);
-transition:transform 3s;
-}
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #000;
+      font-family: Arial, sans-serif;
+      color: white;
+    }
 
-button{
-padding:10px 20px;
-font-size:20px;
-}
-</style>
+    .container {
+      width: 100%;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0 0 30px;
+      font-size: 42px;
+      letter-spacing: 1px;
+    }
+
+    .wheel-wrapper {
+      position: relative;
+      width: 380px;
+      height: 380px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .pointer {
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 18px solid transparent;
+      border-right: 18px solid transparent;
+      border-top: 38px solid white;
+      z-index: 10;
+      filter: drop-shadow(0 0 10px rgba(255,255,255,0.35));
+    }
+
+    .wheel {
+      position: relative;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      border: 8px solid white;
+      box-shadow:
+        0 0 20px rgba(255,255,255,0.15),
+        0 0 60px rgba(255,255,255,0.08);
+      overflow: hidden;
+      transition: transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+      background:
+        conic-gradient(
+          #ff3b3b 0deg 60deg,
+          #2d7cff 60deg 120deg,
+          #18c964 120deg 180deg,
+          #ffd60a 180deg 240deg,
+          #ff9f0a 240deg 300deg,
+          #bf5af2 300deg 360deg
+        );
+    }
+
+    .center-circle {
+      position: absolute;
+      width: 70px;
+      height: 70px;
+      background: #111;
+      border: 5px solid white;
+      border-radius: 50%;
+      z-index: 5;
+      box-shadow: 0 0 15px rgba(255,255,255,0.2);
+    }
+
+    .label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 140px;
+      transform-origin: 0% 0%;
+      font-weight: bold;
+      font-size: 18px;
+      color: white;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      pointer-events: none;
+    }
+
+    button {
+      border: none;
+      background: white;
+      color: black;
+      font-size: 22px;
+      font-weight: bold;
+      padding: 14px 32px;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: 0.2s ease;
+      box-shadow: 0 0 18px rgba(255,255,255,0.18);
+    }
+
+    button:hover {
+      transform: scale(1.05);
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .result {
+      margin-top: 25px;
+      min-height: 40px;
+      font-size: 28px;
+      font-weight: bold;
+      color: #ffd60a;
+      text-shadow: 0 0 12px rgba(255,214,10,0.35);
+    }
+
+    .sub {
+      margin-top: 10px;
+      color: #aaa;
+      font-size: 15px;
+    }
+
+    @media (max-width: 500px) {
+      .wheel-wrapper {
+        width: 300px;
+        height: 300px;
+      }
+
+      .wheel {
+        width: 280px;
+        height: 280px;
+      }
+
+      .label {
+        width: 115px;
+        font-size: 15px;
+      }
+
+      h1 {
+        font-size: 32px;
+      }
+
+      .result {
+        font-size: 22px;
+      }
+    }
+  </style>
 </head>
-
 <body>
+  <div class="container">
+    <h1>Ma Roue 🎡</h1>
 
-<h1>Ma Roue 🎡</h1>
+    <div class="wheel-wrapper">
+      <div class="pointer"></div>
+      <div id="wheel" class="wheel"></div>
+      <div class="center-circle"></div>
+    </div>
 
-<div id="wheel"></div>
+    <button id="spinBtn">Tourner</button>
+    <div id="result" class="result"></div>
+    <div class="sub">Clique sur le bouton pour lancer la roue</div>
+  </div>
 
-<button onclick="spin()">Tourner</button>
+  <script>
+    const items = [
+      "100€",
+      "Perdu",
+      "Skin rare",
+      "50€",
+      "Bonus",
+      "Jackpot"
+    ];
 
-<script>
-function spin(){
-let wheel=document.getElementById("wheel");
-let random=Math.floor(Math.random()*360)+720;
-wheel.style.transform="rotate("+random+"deg)";
-}
-</script>
+    const wheel = document.getElementById("wheel");
+    const result = document.getElementById("result");
+    const spinBtn = document.getElementById("spinBtn");
 
+    const segmentCount = items.length;
+    const segmentAngle = 360 / segmentCount;
+
+    let currentRotation = 0;
+    let isSpinning = false;
+
+    function createLabels() {
+      items.forEach((item, i) => {
+        const label = document.createElement("div");
+        label.className = "label";
+
+        const angle = i * segmentAngle + segmentAngle / 2;
+        label.style.transform = `rotate(${angle}deg) translate(90px) rotate(90deg)`;
+        label.textContent = item;
+
+        wheel.appendChild(label);
+      });
+    }
+
+    createLabels();
+
+    function spinWheel() {
+      if (isSpinning) return;
+
+      isSpinning = true;
+      spinBtn.disabled = true;
+      result.textContent = "";
+
+      const winnerIndex = Math.floor(Math.random() * items.length);
+
+      const targetAngle = 360 - (winnerIndex * segmentAngle + segmentAngle / 2);
+
+      const extraSpins = 360 * (5 + Math.floor(Math.random() * 3));
+      currentRotation += extraSpins + targetAngle;
+
+      wheel.style.transform = `rotate(${currentRotation}deg)`;
+
+      setTimeout(() => {
+        result.textContent = "Tombé sur : " + items[winnerIndex];
+        isSpinning = false;
+        spinBtn.disabled = false;
+      }, 5200);
+    }
+
+    spinBtn.addEventListener("click", spinWheel);
+  </script>
 </body>
 </html>
